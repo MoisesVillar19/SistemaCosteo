@@ -1,10 +1,11 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 cache.db
 *.xlsx
 *.xls
 *.log
 .env
 .DS_Store
-
+Thumbs.db
