@@ -16,8 +16,8 @@ print(f"Excel generado: {archivo}")
 
 
 # 1️⃣ Cargar archivos
-path_maestro = "Empresas/Empresa_A/Maestros.xlsx"
-path_kardex  = "Empresas/Empresa_A/Kardex.xlsx"
+path_maestro = "Empresas/Empresa1/Maestros.xlsx"
+path_kardex  = "Empresas/Empresa1/Kardex.xlsx"
 
 maestros = cargar_maestros(path_maestro)
 kardex_df = cargar_kardex(path_kardex)
