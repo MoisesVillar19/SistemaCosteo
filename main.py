@@ -5,6 +5,15 @@ from core.loader import cargar_maestros, cargar_kardex
 from core.costeo.valorizacion import procesar_archivo
 from core.costeo.costos_indirectos import analisis_relevancia
 import os
+from core.costeo.consolidado import generar_consolidado_y_excel
+
+# 1️⃣ Cargar datos
+df_materiales, df_mod, df_servicios, df_cif = cargar_maestros("Maestros.xlsx")
+
+# 2️⃣ Generar Excel maestro
+archivo = generar_consolidado_y_excel(df_materiales, df_mod, df_servicios, df_cif, "EmpresaX", 2025, ["01", "02"])
+print(f"Excel generado: {archivo}")
+
 
 # 1️⃣ Cargar archivos
 path_maestro = "Empresas/Empresa_A/Maestros.xlsx"
