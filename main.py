@@ -7,27 +7,22 @@ from core.costeo.costos_indirectos import analisis_relevancia
 from core.costeo.consolidado import generar_consolidado_y_excel
 from core.reports.generar_dashboard import generar_excel_dashboard
 from gui.main_window import MainWindow
-import tkinter as tk
-
 
 # ------------------------------------------------------
 # 🚀 Modo GUI (si se llama con "python main.py gui")
 # ------------------------------------------------------
 if len(sys.argv) > 1 and sys.argv[1].lower() == "gui":
-    
     app = MainWindow()
     app.mainloop()
     sys.exit()
 
-
 # ------------------------------------------------------
 # ⚙️ Modo automático (sin interfaz)
 # ------------------------------------------------------
-def ejecutar_costeo_completo(empresa: str, anno: int, meses: list):
+def ejecutar_costeo_completo(empresa: str, anno: int, meses_input):
     """
     Ejecuta todo el flujo de costeo y análisis de relevancia sin GUI.
     """
-
     print(f"\n=== INICIANDO PROCESO DE COSTEO ({empresa} - {anno}) ===")
 
     # Rutas base
@@ -37,7 +32,7 @@ def ejecutar_costeo_completo(empresa: str, anno: int, meses: list):
 
     # Validar existencia
     if not os.path.exists(path_maestro) or not os.path.exists(path_kardex):
-        raise FileNotFoundError("No se encontraron los archivos de maestros o kardex en la carpeta de la empresa.")
+        raise FileNotFoundError("No se encontraron los archivos de maestros o kardex.")
 
     # 1️⃣ Cargar datos
     print("Cargando archivos maestros y kardex...")
@@ -46,18 +41,17 @@ def ejecutar_costeo_completo(empresa: str, anno: int, meses: list):
 
     # 2️⃣ Procesar Kardex y actualizar costos
     print("Procesando kardex y valorización...")
+    if isinstance(meses_input, str) and meses_input.lower() == "anual":
+        meses = list(range(1, 13))
+    else:
+        meses = [int(m) for m in meses_input]
     procesar_archivo(path_kardex, anno=anno, meses=meses)
 
     # 3️⃣ Generar Excel consolidado
     print("Generando consolidado y archivo Excel...")
     archivo_consolidado = generar_consolidado_y_excel(
-        df_maestros["Materiales"],
-        df_maestros["MOD"],
-        df_maestros["Servicios"],
-        df_maestros["CIF"],
-        empresa,
-        anno,
-        meses
+        df_maestros["MMD"], df_maestros["MOC"], df_maestros["MSD"], df_maestros["MCC"],
+        empresa, anno, meses
     )
 
     # 4️⃣ Generar dashboard y análisis de relevancia
@@ -74,13 +68,11 @@ def ejecutar_costeo_completo(empresa: str, anno: int, meses: list):
     print(f"📊 Consolidado: {archivo_consolidado}")
     print(f"📈 Dashboard: {archivo_dashboard}")
 
-
 # ------------------------------------------------------
 # 🧭 Ejemplo de ejecución directa
 # ------------------------------------------------------
 if __name__ == "__main__":
     empresa = "Empresa1"
     anno = 2025
-    meses = ["01", "02"]
-
+    meses = ["01", "02"]  # o "anual" para todo el año
     ejecutar_costeo_completo(empresa, anno, meses)
