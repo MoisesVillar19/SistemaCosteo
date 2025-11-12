@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from gui.views import import_view, costeo_view, reports_view, dashboard_view
 
+
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
