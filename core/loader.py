@@ -2,19 +2,12 @@
 import pandas as pd
 from pathlib import Path
 
-# --- Función principal para cargar datos por empresa ---
 def cargar_datos_empresa(nombre_empresa: str):
-    """
-    Carga el Kardex y los Maestros para una empresa específica.
-    Retorna: (df_kardex, dict_maestros)
-    """
     base_path = Path("Empresas") / nombre_empresa
 
-    # Verificar que la carpeta exista
     if not base_path.exists():
         raise FileNotFoundError(f"No existe la carpeta de la empresa: {base_path}")
 
-    # Verificar archivos
     path_kardex = base_path / "Kardex.xlsx"
     path_maestros = base_path / "Maestros.xlsx"
 
@@ -23,23 +16,23 @@ def cargar_datos_empresa(nombre_empresa: str):
     if not path_maestros.exists():
         raise FileNotFoundError(f"Falta el archivo Maestros.xlsx en {base_path}")
 
-    # Cargar ambos
     kardex = cargar_kardex(path_kardex)
     maestros = cargar_maestros(path_maestros)
 
     return kardex, maestros
 
-
-# --- Funciones auxiliares existentes ---
-
 def cargar_maestros(path_maestro):
-    """Lee todas las hojas del archivo maestro y devuelve un diccionario con DataFrames."""
     sheets = pd.read_excel(path_maestro, sheet_name=None)
     return {
         "MEC": sheets.get("MEC"),
+        "MEC2": sheets.get("MEC2"),
+        "MEC3": sheets.get("MEC3"),
+        "MEC4": sheets.get("MEC4"),
+        "MEC5": sheets.get("MEC5"),
         "MOC": sheets.get("MOC"),
         "MCC": sheets.get("MCC"),
         "KMD": sheets.get("KMD"),
+        "KSD": sheets.get("KSD"),  # Nueva hoja para kernel de servicios directos
         "MPD": sheets.get("MPD"),
         "MMD": sheets.get("MMD"),
         "MSD": sheets.get("MSD"),
@@ -47,9 +40,7 @@ def cargar_maestros(path_maestro):
         "VTAS": sheets.get("VTAS"),
     }
 
-
 def cargar_kardex(path_kardex):
-    """Lee el Kardex completo con todas las columnas necesarias."""
     columnas_necesarias = [
         "ORDEN", "ARTICULO", "NOMBRE_ITEM", "COD_ALMACEN", "ORIGEN", "NOMBRE_LARGO",
         "ANNO_MOVI", "MES_MOVI", "UNIDAD_MEDIDA", "FECHA_MOVI",
@@ -62,22 +53,13 @@ def cargar_kardex(path_kardex):
 
     df = pd.read_excel(path_kardex)
 
-    # Validar columnas faltantes
     faltantes = [col for col in columnas_necesarias if col not in df.columns]
     if faltantes:
         raise ValueError(f"Faltan las siguientes columnas en el Kardex: {faltantes}")
 
-    # Convertir FECHA_MOVI a formato fecha
     df["FECHA_MOVI"] = pd.to_datetime(df["FECHA_MOVI"], errors="coerce")
 
     return df
-
-
-    df = pd.read_excel(path_kardex)
-    faltantes = [col for col in columnas_necesarias if col not in df.columns]
-    if faltantes:
-        raise ValueError(f"Faltan las siguientes columnas en el Kardex: {faltantes}")
-
     # Asegurar formato de fecha
     df["FECHA_MOVI"] = pd.to_datetime(df["FECHA_MOVI"], errors="coerce")
 

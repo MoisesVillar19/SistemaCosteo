@@ -3,10 +3,12 @@ import sys
 import os
 from core.loader import cargar_maestros, cargar_kardex
 from core.costeo.valorizacion import procesar_archivo
-from core.costeo.costos_indirectos import analisis_relevancia
+from core.reports.analisis_relevancia import analisis_relevancia
 from core.costeo.consolidado import generar_consolidado_y_excel
 from core.reports.generar_dashboard import generar_excel_dashboard
 from gui.main_window import MainWindow
+from core.loader import cargar_kardex
+
 
 # ------------------------------------------------------
 # 🚀 Modo GUI (si se llama con "python main.py gui")
