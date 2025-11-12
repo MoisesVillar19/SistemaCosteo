@@ -3,7 +3,7 @@ import sys
 import os
 from core.loader import cargar_maestros, cargar_kardex
 from core.costeo.valorizacion import procesar_archivo
-from core.costeo.costos_indirectos import analisis_relevancia
+from core.reports.analisis_relevancia import analisis_relevancia
 from core.costeo.consolidado import generar_consolidado_y_excel
 from core.reports.generar_dashboard import generar_excel_dashboard
 from gui.main_window import MainWindow
@@ -71,8 +71,8 @@ def ejecutar_costeo_completo(empresa: str, anno: int, meses_input):
 # ------------------------------------------------------
 # 🧭 Ejemplo de ejecución directa
 # ------------------------------------------------------
+
 if __name__ == "__main__":
-    empresa = "Empresa1"
-    anno = 2025
-    meses = ["01", "02"]  # o "anual" para todo el año
-    ejecutar_costeo_completo(empresa, anno, meses)
+    # Simplemente abrimos la ventana principal
+    app = MainWindow()
+    app.mainloop()
