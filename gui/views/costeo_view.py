@@ -1,29 +1,15 @@
-import tkinter as tk
-from tkinter import messagebox
+from gui.components.alert_component import mostrar_info, mostrar_error
+from core.reports.generar_dashboard import generar_excel_dashboard
 
-from core.loader import cargar_maestros, cargar_kardex
-from core.costeo.consolidado import generar_consolidado_y_excel
+def ejecutar_costeo(path_maestro, path_kardex, empresa, anno, meses):
+    if not path_maestro or not path_kardex:
+        mostrar_error("Archivos no seleccionados")
+        return None, None
 
-def procesar_datos(path_maestro, path_kardex):
     try:
-        # Cargar datos
-        maestros = cargar_maestros(path_maestro)
-        kardex = cargar_kardex(path_kardex)
-
-        # Aquí llamas a tus funciones de cálculo (simulado)
-        df_materiales = maestros["MMD"]
-        df_mod = maestros["MOC"]
-        df_servicios = maestros["MSD"]
-        df_cif = maestros["MCC"]
-
-        # Llamar a la generación del Excel final
-        archivo_salida = generar_consolidado_y_excel(
-            df_materiales, df_mod, df_servicios, df_cif,
-            empresa="empresa1", anno=2025, meses=[1,2,3]
-        )
-
-        messagebox.showinfo("Éxito", f"Archivo generado:\n{archivo_salida}")
-
+        archivo_salida, dfs = generar_excel_dashboard(path_maestro, path_kardex, empresa, anno, meses)
+        mostrar_info(f"Archivo generado:\n{archivo_salida}")
+        return archivo_salida, dfs
     except Exception as e:
-        messagebox.showerror("Error", str(e))
-
+        mostrar_error(str(e))
+        return None, None

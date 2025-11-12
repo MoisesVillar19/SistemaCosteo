@@ -1,32 +1,86 @@
 # main.py
-# main.py
-
+import sys
+import os
 from core.loader import cargar_maestros, cargar_kardex
 from core.costeo.valorizacion import procesar_archivo
 from core.costeo.costos_indirectos import analisis_relevancia
-import os
 from core.costeo.consolidado import generar_consolidado_y_excel
-
-# 1️⃣ Cargar datos
-df_materiales, df_mod, df_servicios, df_cif = cargar_maestros("Maestros.xlsx")
-
-# 2️⃣ Generar Excel maestro
-archivo = generar_consolidado_y_excel(df_materiales, df_mod, df_servicios, df_cif, "EmpresaX", 2025, ["01", "02"])
-print(f"Excel generado: {archivo}")
+from core.reports.generar_dashboard import generar_excel_dashboard
+from gui.main_window import MainWindow
+import tkinter as tk
 
 
-# 1️⃣ Cargar archivos
-path_maestro = "Empresas/Empresa1/Maestros.xlsx"
-path_kardex  = "Empresas/Empresa1/Kardex.xlsx"
+# ------------------------------------------------------
+# 🚀 Modo GUI (si se llama con "python main.py gui")
+# ------------------------------------------------------
+if len(sys.argv) > 1 and sys.argv[1].lower() == "gui":
+    
+    app = MainWindow()
+    app.mainloop()
+    sys.exit()
 
-maestros = cargar_maestros(path_maestro)
-kardex_df = cargar_kardex(path_kardex)
 
-# 2️⃣ Procesar kardex (esto actualiza la hoja KMD en el Excel de maestros)
-carpeta_salida = os.path.join("Resultados", "Empresa_A")
-procesar_archivo(path_kardex, anno=2025, meses=[10, 11])
+# ------------------------------------------------------
+# ⚙️ Modo automático (sin interfaz)
+# ------------------------------------------------------
+def ejecutar_costeo_completo(empresa: str, anno: int, meses: list):
+    """
+    Ejecuta todo el flujo de costeo y análisis de relevancia sin GUI.
+    """
 
-# 3️⃣ Generar análisis de relevancia directamente con el DataFrame MEC
-df_mec = maestros["MEC"]
-analisis_relevancia(df_mec, carpeta_salida)
+    print(f"\n=== INICIANDO PROCESO DE COSTEO ({empresa} - {anno}) ===")
 
+    # Rutas base
+    base_empresas = os.path.join("Empresas", empresa)
+    path_maestro = os.path.join(base_empresas, "Maestros.xlsx")
+    path_kardex = os.path.join(base_empresas, "Kardex.xlsx")
+
+    # Validar existencia
+    if not os.path.exists(path_maestro) or not os.path.exists(path_kardex):
+        raise FileNotFoundError("No se encontraron los archivos de maestros o kardex en la carpeta de la empresa.")
+
+    # 1️⃣ Cargar datos
+    print("Cargando archivos maestros y kardex...")
+    df_maestros = cargar_maestros(path_maestro)
+    df_kardex = cargar_kardex(path_kardex)
+
+    # 2️⃣ Procesar Kardex y actualizar costos
+    print("Procesando kardex y valorización...")
+    procesar_archivo(path_kardex, anno=anno, meses=meses)
+
+    # 3️⃣ Generar Excel consolidado
+    print("Generando consolidado y archivo Excel...")
+    archivo_consolidado = generar_consolidado_y_excel(
+        df_maestros["Materiales"],
+        df_maestros["MOD"],
+        df_maestros["Servicios"],
+        df_maestros["CIF"],
+        empresa,
+        anno,
+        meses
+    )
+
+    # 4️⃣ Generar dashboard y análisis de relevancia
+    print("Generando dashboard y análisis de relevancia...")
+    archivo_dashboard, dfs_dashboard = generar_excel_dashboard(
+        path_maestro, path_kardex, empresa, anno, meses
+    )
+
+    df_mec = df_maestros.get("MEC")
+    if df_mec is not None:
+        analisis_relevancia(df_mec, os.path.dirname(archivo_consolidado))
+
+    print(f"\n✅ Proceso completado exitosamente.")
+    print(f"📊 Consolidado: {archivo_consolidado}")
+    print(f"📈 Dashboard: {archivo_dashboard}")
+
+
+# ------------------------------------------------------
+# 🧭 Ejemplo de ejecución directa
+# ------------------------------------------------------
+if __name__ == "__main__":
+    empresa = "Empresa1"
+    anno = 2025
+    meses = ["01", "02"]
+
+    ejecutar_costeo_completo(empresa, anno, meses)
