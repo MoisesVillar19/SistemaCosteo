@@ -1,39 +1,43 @@
-import tkinter as tk
+# gui/views/dashboard_view.py
 from gui.components.chart_component import Chart
+from gui.components.table_component import Table
 
-def limpiar_frame(parent_frame):
-    """Elimina todos los widgets del frame."""
+def mostrar_dashboard_completo(parent_frame, dfs: dict):
+    """
+    Muestra todos los gráficos y tablas del dashboard en un frame.
+    dfs: dict con DataFrames de los reportes:
+        - "Gastos", "Margen", "AnalisisRelevancia",
+        - "Comparativo", "EstadoResultados", "KPIs"
+    """
+    # Limpiar frame
     for widget in parent_frame.winfo_children():
         widget.destroy()
 
-# ---------------- Gráficos principales ----------------
-def mostrar_grafico_gastos(parent_frame, df_gastos):
-    limpiar_frame(parent_frame)
-    chart = Chart(parent_frame, tipo="bar", datos=df_gastos,
-                  x="Producto", y=["Costo_Material","Costo_MOD","Costo_CIF"])
-    chart.pack(fill="both", expand=True)
+    # ----------------- Analisis de Gastos -----------------
+    if "Gastos" in dfs:
+        lbl_gastos = Table(parent_frame, dfs["Gastos"], titulo="Analisis de Gastos")
+        lbl_gastos.pack(fill="both", expand=True, pady=5)
 
-def mostrar_grafico_margen(parent_frame, df_margen):
-    limpiar_frame(parent_frame)
-    chart = Chart(parent_frame, tipo="pie", datos=df_margen,
-                  labels="Producto", values="Margen")
-    chart.pack(fill="both", expand=True)
+    # ----------------- Comparativo Periodos -----------------
+    if "Comparativo" in dfs:
+        tbl_compara = Table(parent_frame, dfs["Comparativo"], titulo="Comparativo de Periodos")
+        tbl_compara.pack(fill="both", expand=True, pady=5)
 
-# ---------------- Gráficos adicionales ----------------
-def mostrar_grafico_comparativo(parent_frame, df_comparativo):
-    limpiar_frame(parent_frame)
-    chart = Chart(parent_frame, tipo="line", datos=df_comparativo,
-                  x="Periodo", y=["Monto"])
-    chart.pack(fill="both", expand=True)
+    # ----------------- Estado de Resultados -----------------
+    if "EstadoResultados" in dfs:
+        tbl_estado = Table(parent_frame, dfs["EstadoResultados"], titulo="Estado de Resultados")
+        tbl_estado.pack(fill="both", expand=True, pady=5)
 
-def mostrar_grafico_estado_resultados(parent_frame, df_estado):
-    limpiar_frame(parent_frame)
-    chart = Chart(parent_frame, tipo="bar", datos=df_estado,
-                  x="Cuenta", y=["Monto"])
-    chart.pack(fill="both", expand=True)
+    # ----------------- KPIs -----------------
+    if "KPIs" in dfs:
+        tbl_kpis = Table(parent_frame, dfs["KPIs"], titulo="KPIs")
+        tbl_kpis.pack(fill="both", expand=True, pady=5)
 
-def mostrar_grafico_kpis(parent_frame, df_kpis):
-    limpiar_frame(parent_frame)
-    chart = Chart(parent_frame, tipo="bar", datos=df_kpis,
-                  x="Indicador", y=["Valor"])
-    chart.pack(fill="both", expand=True)
+    # ----------------- Margen de Utilidad (Gráfico) -----------------
+    if "Margen" in dfs:
+        Chart(parent_frame, tipo="pie", datos=dfs["Margen"], labels="Producto", values="Margen").pack(fill="both", expand=True, pady=5)
+
+    # ----------------- Analisis de Relevancia -----------------
+    if "AnalisisRelevancia" in dfs:
+        tbl_relevancia = Table(parent_frame, dfs["AnalisisRelevancia"], titulo="Analisis de Relevancia")
+        tbl_relevancia.pack(fill="both", expand=True, pady=5)

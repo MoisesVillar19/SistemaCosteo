@@ -1,3 +1,4 @@
+# gui/views/costeo_view.py
 from gui.components.alert_component import mostrar_info, mostrar_error
 from core.reports.generar_dashboard import generar_excel_dashboard
 

@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from hoja_costeo import hoja_costeo_detallada
+from .hoja_costeo import hoja_costeo_detallada
 # costeo/consolidado.py
 
 def consolidar_costos(df_materiales, df_mod, df_cif):

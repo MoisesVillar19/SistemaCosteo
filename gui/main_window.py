@@ -44,9 +44,15 @@ class MainWindow(tk.Tk):
     def seleccionar_archivos(self):
         self.path_maestro, self.path_kardex = import_view.seleccionar_archivos()
         if self.path_maestro and self.path_kardex:
-            messagebox.showinfo("✅ Archivos Seleccionados", "Archivos maestro y kardex cargados correctamente.")
-        else:
-            messagebox.showerror("Error", "Debe seleccionar ambos archivos.")
+            # Extraer nombre del archivo maestro sin extensión
+            import os
+            nombre_archivo = os.path.splitext(os.path.basename(self.path_maestro))[0]
+
+            # Actualizar la entrada de empresa
+            self.entry_empresa.delete(0, tk.END)
+            self.entry_empresa.insert(0, nombre_archivo)
+
+            messagebox.showinfo("Archivos Seleccionados", "Maestro y Kardex seleccionados correctamente.")
 
     # ---------------------- COSTEO ----------------------
     def _init_costeo_tab(self):
@@ -63,10 +69,11 @@ class MainWindow(tk.Tk):
         self.entry_anno.grid(row=1, column=1)
         self.entry_anno.insert(0, "2025")
 
-        tk.Label(frame, text="Meses (ej: 1,2,3):").grid(row=2, column=0)
+        tk.Label(frame, text="Meses (1,2,3 o 'anual'):").grid(row=2, column=0)
         self.entry_meses = tk.Entry(frame)
         self.entry_meses.grid(row=2, column=1)
-        self.entry_meses.insert(0, "1,2,3")
+        self.entry_meses.insert(0, "1,2,3")  # valor por defecto
+
 
         btn_run = tk.Button(
             frame, text="Ejecutar Costeo y Generar Reportes",
@@ -82,7 +89,13 @@ class MainWindow(tk.Tk):
 
         empresa = self.entry_empresa.get()
         anno = int(self.entry_anno.get())
-        meses = list(map(int, self.entry_meses.get().split(",")))
+        # Convertir entrada de meses, acepta 'anual' o lista separada por comas
+        entrada = self.entry_meses.get().strip().lower()
+        if entrada == "anual":
+            meses = list(range(1, 13))
+        else:
+            meses = list(map(int, entrada.split(",")))
+
 
         # Ejecutar proceso principal
         archivo_salida, dfs = costeo_view.ejecutar_costeo(self.path_maestro, self.path_kardex, empresa, anno, meses)
@@ -90,19 +103,33 @@ class MainWindow(tk.Tk):
         if archivo_salida:
             self.dataframes = dfs
             messagebox.showinfo(
-                "✅ Éxito",
-                f"Archivo Excel generado:\n{archivo_salida}\n\n"
-                "Puedes revisar los reportes y gráficos en sus pestañas."
-            )
+            "✅ Éxito",
+            f"Archivo Excel generado:\n{archivo_salida}\n\n"
+            "Puedes revisar los reportes y gráficos en sus pestañas."
+        )
 
-            # Limpia contenido previo
-            for frame in (self.frame_reports, self.frame_dashboard):
-                for widget in frame.winfo_children():
-                    widget.destroy()
+        # Limpiar frames previos
+        for frame in (self.frame_reports, self.frame_dashboard):
+            for widget in frame.winfo_children():
+                widget.destroy()
 
-            # Carga vista inicial por defecto
-            if "Consolidado" in dfs:
-                reports_view.mostrar_reporte(self.frame_reports, dfs["Consolidado"], "Consolidado")
+         # Mostrar reportes individuales
+        if "Consolidado" in dfs:
+            reports_view.mostrar_reporte(self.frame_reports, dfs["Consolidado"], "Consolidado")
+
+        # Mostrar dashboard completo (todos los reportes + análisis de relevancia)
+        dashboard_view.mostrar_dashboard_completo(self.frame_dashboard, dfs)
+
+
+    # ----------------- Mostrar Reportes -----------------
+        if "Consolidado" in dfs:
+            reports_view.mostrar_reporte(self.frame_reports, dfs["Consolidado"], "Consolidado")
+
+    # ----------------- Mostrar Dashboard Completo -----------------
+    # Aquí se muestran automáticamente:
+    # Gastos, Margen, Analisis de Relevancia, Comparativo, EstadoResultados, KPIs
+        dashboard_view.mostrar_dashboard_completo(self.frame_dashboard, dfs)
+
 
     # ---------------------- REPORTES ----------------------
     def _init_reports_tab(self):
